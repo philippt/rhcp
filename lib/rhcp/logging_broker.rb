@@ -6,6 +6,7 @@ module RHCP
 
     def initialize(wrapped_broker)
       @wrapped_broker = wrapped_broker
+      @logger = RHCP::ModuleHelper::instance.logger
     end
 
     def get_command_list(context = RHCP::Context.new())
@@ -23,7 +24,13 @@ module RHCP
     def get_blacklisted_commands
       [ "log_to_jabber", "log_to_jabber_detail", "on_host", "hostname" ]
     end
-
+    
+    
+    # TODO would be nice if this helper method would be accessible from inside vop plugins
+    def var_name(name)
+      self.class.to_s + "." + name
+    end
+    
     def execute(request)
       blacklisted = get_blacklisted_commands.include?(request.command.name)
       if not blacklisted and request.context.cookies.has_key?('__loggingbroker.blacklisted_commands') then
@@ -33,21 +40,21 @@ module RHCP
       command = get_command(request.command.name, request.context)
       mode = command.is_read_only ? 'r/o' : 'r/w'
   
-      is_new_request = Thread.current["request_id"] == nil
+      is_new_request = Thread.current[var_name("request_id")] == nil
       if is_new_request
-        Thread.current["request_id"] = Time.now().to_i.to_s + '_' + request.command.name
-        Thread.current["stack"] = []
-        Thread.current["id_stack"] = []
+        Thread.current[var_name("request_id")] = Time.now().to_i.to_s + '_' + request.command.name
+        Thread.current[var_name("stack")] = []
+        Thread.current[var_name("id_stack")] = []
       end
       
-      Thread.current["stack"] << command.name
+      Thread.current[var_name("stack")] << command.name
       
-      level = Thread.current["stack"].size()
+      level = Thread.current[var_name("stack")].size()
       
       unless blacklisted    
-        #$logger.info ">> #{command.name} (#{mode}) : #{Thread.current["stack"].join(" -> ")}"
+        #$logger.info ">> #{command.name} (#{mode}) : #{Thread.current[var_name("stack")].join(" -> ")}"
         start_ts = Time.now()
-        log_request_start(Thread.current["request_id"], level, mode, Thread.current["stack"], request, start_ts)
+        log_request_start(Thread.current[var_name("request_id")], level, mode, Thread.current[var_name("stack")], request, start_ts)
       end
       
       response = @wrapped_broker.execute(request)
@@ -56,10 +63,10 @@ module RHCP
         stop_ts = Time.now()
         duration = stop_ts - start_ts
         
-        log_request_stop(Thread.current["request_id"], level, mode, Thread.current["stack"], request, response, duration)
+        log_request_stop(Thread.current[var_name("request_id")], level, mode, Thread.current[var_name("stack")], request, response, duration)
       end
       
-      Thread.current["stack"].pop
+      Thread.current[var_name("stack")].pop
       
       response
     end
