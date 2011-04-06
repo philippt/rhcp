@@ -30,16 +30,14 @@ module RHCP
           request.context.cookies[k] = v
         end
         new_request = RHCP::Request.new(request.command, request.param_values, request.context)
-        $logger.debug("+++ wrapped own request  : #{new_request}")
+        #$logger.debug("+++ wrapped own request  : #{new_request}")
         new_request
       end
 
       def execute(request)
-      #def execute(command_name, params = {}, context=@context)
-        $logger.debug("+++ ContextAwareBroker.execute (#{request.command.name}, #{request.param_values}, #{request.context}) +++")
+        #$logger.debug("+++ ContextAwareBroker.execute (#{request.command.name}, #{request.param_values}, #{request.context}) +++")
 
         new_request = give_the_request_some_context_rico(request)
-        #command = get_command(new_request.command.name, new_request.context)
         response = @wrapped_broker.execute(new_request)
 
         # store context received with response
