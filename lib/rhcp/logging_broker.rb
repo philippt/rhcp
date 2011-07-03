@@ -5,6 +5,7 @@ module RHCP
   class LoggingBroker < Broker
 
     def initialize(wrapped_broker)
+      super()
       @wrapped_broker = wrapped_broker
       @logger = RHCP::ModuleHelper::instance.logger
     end
@@ -61,7 +62,7 @@ module RHCP
       
       unless blacklisted
         stop_ts = Time.now()
-        duration = stop_ts - start_ts
+        duration = stop_ts.to_i - start_ts.to_i
         
         log_request_stop(Thread.current[var_name("request_id")], level, mode, Thread.current[var_name("stack")], request, response, duration)
       end

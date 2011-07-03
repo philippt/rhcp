@@ -6,7 +6,7 @@
 
 Summary: RHCP is a protocol designed for building up a command-metadata-based communication infrastructure making it easier for application developers to export commands in applications to generic clients
 Name: rubygem-%{gemname}
-Version: 0.2.13
+Version: 0.2.14
 Release: 1%{?dist}
 Group: Development/Languages
 License: GPLv2+ or Ruby
@@ -51,6 +51,8 @@ rm -rf %{buildroot}
 
 
 %changelog
+* Sun Jul 03 2011 xop <philipp@xop-consulting.com> - 0.2.14-1
+- minor adjustments for new virtualop command loader
 * Sat Mar 19 2011 xop <philipp@xop-consulting.com> - 0.2.13-1
 - bugfix: added class name to thread local variables in LoggingBroker
 * Mon Feb 28 2011 xop <philipp@xop-consulting.com> - 0.2.12-2

@@ -15,13 +15,13 @@ module RHCP
     attr_reader :name
 
     # textual description of what this command is doing
-    attr_reader :description
+    attr_accessor :description
     
     # the parameters supported by this command
     attr_reader :params
 
     # the block that should be executed if this command is invoked
-    attr_reader :block
+    attr_accessor :block
     
     # the parameter that is the default param for this command; might be nil
     attr_reader :default_param
@@ -39,12 +39,12 @@ module RHCP
     # hints about how the result of this command might be displayed
     attr_accessor :result_hints
 
-    def initialize(name, description, block)
+    def initialize(name, description, block = nil)
       @logger = RHCP::ModuleHelper.instance().logger
       
       @name = name
       @description = description
-      @block = block      
+      @block = block unless block == nil
       @params = Array.new()
       
       @default_param = nil

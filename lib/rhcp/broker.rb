@@ -8,6 +8,7 @@ module RHCP
   class Broker
     
     attr_reader :name
+    attr_reader :known_commands
     
     def initialize(name = "")
       # command_name => command
@@ -17,12 +18,17 @@ module RHCP
     
     ################################################################################################
     # public server interface
-    
+
     # registers a new command - this method should be called by the application
     # providing the command
     def register_command(command)
       raise RHCP::RhcpException.new("duplicate command name : #{command.name}") if @known_commands.has_key?(command.name)
       @known_commands[command.name] = command
+    end
+    
+    def unregister_command(name)
+      raise RHCP::RhcpException.new("no command found with name '#{name}'") unless @known_commands.has_key?(name)
+      @known_commands.delete name
     end
     
     # removes all commands that have been registered previously
