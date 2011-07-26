@@ -19,8 +19,8 @@ module RHCP
     def initialize(command, some_param_values = {}, context = RHCP::Context.new())
       param_values = some_param_values.clone()
       @logger = RHCP::ModuleHelper.instance().logger
-      @logger.debug "initializing request #{command.name} with params #{param_values}"
       raise RHCP::RhcpException.new("command may not be null") if command == nil
+      @logger.debug "initializing request #{command.name} with params #{param_values}"
 
       @context = context
 

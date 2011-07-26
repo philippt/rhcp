@@ -51,7 +51,8 @@ rm -rf %{buildroot}
 
 
 %changelog
-* Sun Jul 03 2011 xop <philipp@xop-consulting.com> - 0.2.14-1
+
+* Tue Jul 26 2011 xop <philipp@xop-consulting.com> - 0.2.14-1
 - minor adjustments for new virtualop command loader
 * Sat Mar 19 2011 xop <philipp@xop-consulting.com> - 0.2.13-1
 - bugfix: added class name to thread local variables in LoggingBroker

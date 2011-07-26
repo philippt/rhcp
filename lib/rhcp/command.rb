@@ -140,7 +140,7 @@ module RHCP
       # check that we've got all mandatory params
       @params.each do |param|
         if param.mandatory && ! request.param_values.has_key?(param.name)
-          raise RHCP::RhcpException.new("missing mandatory parameter '#{param.name}'")
+          raise RHCP::RhcpException.new("missing mandatory parameter '#{param.name}' for command '#{self.name}'")
         end
       end
       
@@ -163,6 +163,47 @@ module RHCP
     def execute(param_values = {}, context = RHCP::Context.new())
       req = RHCP::Request.new(self, param_values, context)
       execute_request(req)
+    end
+    
+    def add_as_instance_method(the_instance, additional_param_values = {})
+      rhcp_command = self
+      command_name = rhcp_command.name
+  
+      already_defined = the_instance.methods.select { |m| m == command_name }.size() > 0
+      if already_defined
+        the_instance.class.send(:remove_method, command_name.to_sym)
+      end
+      the_instance.class.send(:define_method, command_name.to_sym) do |*args|
+        # args is an array - but we need the (optional) hash on index 0
+        param_values = {}
+        if args.length > 0
+          $logger.debug("args: #{args}")
+          param_values = args.first
+        end
+  
+        # we need to carry along the context
+        the_broker = Thread.current['broker']
+        
+        param_values.merge! additional_param_values
+  
+        #param_values["host"] = @hostname if self.class.to_s == "HostController"
+        
+        request = RHCP::Request.new(rhcp_command, param_values, the_broker.context)
+        
+        response = the_broker.execute(request)
+  
+        if (response.status != RHCP::Response::Status::OK) then
+          # TODO actually, it would be nice if we could log the details into a file and show only the message
+          filtered_error_detail = response.error_detail.split("\n").select do |line|
+            /lib\/plugins\//.match(line)
+          end.join("\n")
+          
+          $logger.error("#{response.error_text}\n#{response.error_detail}")
+          #$logger.error("#{response.error_text}")
+          raise RuntimeError.new(response.error_text)
+        end
+        response.data
+      end
     end
     
     
