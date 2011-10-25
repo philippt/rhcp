@@ -11,6 +11,9 @@ module RHCP
       
     # TODO add metadata about the command's result (display type ("table"), column order etc.)
     
+    # a qualified name that identifies this command in a dot-separated namespace
+    attr_reader :full_name
+    
     # a unique name for this command
     attr_reader :name
 
@@ -42,7 +45,10 @@ module RHCP
     def initialize(name, description, block = nil)
       @logger = RHCP::ModuleHelper.instance().logger
       
-      @name = name
+      #@logger.info("full name : #{name}")
+      @full_name = name
+      @name = name.split(".").last
+      
       @description = description
       @block = block unless block == nil
       @params = Array.new()
@@ -155,8 +161,6 @@ module RHCP
       # the command has been executed, so we should clear the store of collected param values
       #request.context.collected_values = {}
       
-      fire_post_exec_event(request, response)
-      
       response
     end
     
@@ -177,7 +181,6 @@ module RHCP
         # args is an array - but we need the (optional) hash on index 0
         param_values = {}
         if args.length > 0
-          $logger.debug("args: #{args}")
           param_values = args.first
         end
   
@@ -222,27 +225,6 @@ module RHCP
       }.to_json(*args)
     end
     
-    # TODO think about moving this and the whole command thing to the broker
-    def Command.register_post_exec_listener(block)        
-      @@listener = [] unless defined?(@@listener)
-      @@listener << block
-    end
-    
-    def Command.clear_post_exec_listeners()
-      @@listener = []
-    end
-    
-    def fire_post_exec_event(request, response)
-      return unless defined? @@listener
-      @@listener.each do |listener|
-        begin
-          listener.call(request, response)
-        rescue => ex
-          @logger.warn "a post-exec listener failed with the following message : #{ex}"
-        end
-      end
-    end
-
   end
 
 end
