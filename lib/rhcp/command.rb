@@ -138,6 +138,7 @@ module RHCP
       @logger.debug "gonna execute request >>#{request}<<"
       
       response = RHCP::Response.new()
+      
       # check all param values for plausibility
       request.param_values.each do |key,value|
         get_param(key).check_param_is_valid(request, value)

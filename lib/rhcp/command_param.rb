@@ -25,6 +25,8 @@ module RHCP
     attr_reader :is_default_param
     # the key to a context value that is used for filling this parameter
     attr_reader :autofill_context_key
+    
+    attr_accessor :default_value
 
     # creates a new command parameter
     # options is a hash, possibly holding the following values (all optional)
@@ -32,6 +34,7 @@ module RHCP
     #   :allows_multiple_values   true if this parameter might be specified multiple times
     #   :lookup_method            a block that returns an array of lookup values valid for this param
     #   :is_default_param         true if this parameter is the default param for the enclosing command
+    #   :default_value            a value to use as default (who would have thought?)
     def initialize(name, description, options = Hash.new)
       @name = name
       @description = description
@@ -44,6 +47,7 @@ module RHCP
       @allows_multiple_values = options[:allows_multiple_values] || false
       @is_default_param = options[:is_default_param] || false
       @autofill_context_key = options[:autofill_context_key] || nil
+      @default_value = options[:default_value] || nil
     end
 
     # searches the context for a values that can be auto-filled

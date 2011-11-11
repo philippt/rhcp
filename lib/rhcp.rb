@@ -23,7 +23,7 @@ module RHCP #:nodoc:
     
     MAJOR = 0
     MINOR = 2
-    TINY  = 14
+    TINY  = 15
 
     def Version.to_s
       [ MAJOR, MINOR, TINY ].join(".")
@@ -40,7 +40,7 @@ module RHCP #:nodoc:
     def initialize()
       # TODO do we really want to log to STDOUT per default?
       # TODO check the whole package for correct usage of loggers
-      @logger = Logger.new(STDOUT)
+      @logger = Logger.new("rhcp.log")
     end
     
     
@@ -48,4 +48,4 @@ module RHCP #:nodoc:
   
 end
 
-$logger = Logger.new(STDOUT)
+#$logger = Logger.new(STDOUT)

@@ -25,15 +25,27 @@ module RHCP
       @context = context
 
       command.params.each do |param|
+        
         value_from_context = param.find_value_in_context(context)
         if value_from_context != nil          
           # if the parameter has been specified in the param values, do not override
           if ! param_values.has_key?(param.name)
             @logger.debug "pre-filling param #{param.name} with value '#{value_from_context}' (context key '#{param.autofill_context_key}')"
             param_values[param.name] = value_from_context
+          end                    
+        end
+        
+        # fill params with default values
+        if ! param_values.has_key?(param.name) and param.default_value != nil
+          if param.default_value.class == Proc
+            param_values[param.name] = param.default_value.call(param_values)          
+          else
+            param_values[param.name] = param.default_value
           end
         end
+        
       end
+      
 
       # autobox the parameters if necessary
       param_values.each do |k,v|
