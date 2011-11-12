@@ -93,46 +93,6 @@ class CommandTest < Test::Unit::TestCase
     assert_equal the_param, command.default_param
   end
   
-  def test_listener
-    command = RHCP::Command.new("test_listener", "just some dumb command for the listener", lambda {
-      |req,res|
-      puts "While I think there could be something important to say right now, I just cannot remember what it might have been..."
-      res.result_text = "the test is working."
-    })
-    
-    @listener1_fired = false
-    @listener2_fired = false
-    
-    RHCP::Command.clear_post_exec_listeners()
-    RHCP::Command.register_post_exec_listener(lambda { |req,res| @listener1_fired = true })
-    RHCP::Command.register_post_exec_listener(lambda { |req,res| @listener2_fired = true })    
-    
-    command.execute()
-    
-    assert @listener1_fired
-    assert @listener2_fired
-  end
-  
-  def test_failing_listener
-    command = RHCP::Command.new("test_listener", "just some dumb command for the listener", lambda {
-      |req,res|
-      puts "While I think there could be something important to say right now, I just cannot remember what it might have been..."
-      res.result_text = "the test is working"
-    })
-  
-    RHCP::Command.clear_post_exec_listeners()
-    RHCP::Command.register_post_exec_listener(lambda { |req,res| raise "this listener is dying"})
-    
-    @listener1_fired = false
-    @listener2_fired = false
-    
-    response = command.execute()
-    assert_not_nil response
-    assert_equal "the test is working", response.result_text
-    assert ! @listener1_fired
-    assert ! @listener2_fired
-  end
-
   def test_enabled_through_context
     command = RHCP::Command.new("context_test", "testing the context", lambda {
       |req,res|
