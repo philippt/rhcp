@@ -94,29 +94,46 @@ module RHCP
     # Params:
     #   +broker+ is the broker to use for command lookup
     #   +json_data+ is the JSON data that represents the request
-    def self.reconstruct_from_json(broker, json_data)
-      object = JSON.parse(json_data)
-      
-      context = object.has_key?('context') ?
-        RHCP::Context.reconstruct_from_json(object['context']) :
-        RHCP::Context.new(object['cookies'])
-        
-      command = broker.get_command(object['command_name'], context)      
-        
-      self.new(command, object['param_values'], context)
-    end
-
-    # returns a JSON representation of this request.
-    def to_json(*args)
+    # def self.reconstruct_from_json(broker, json_data)
+      # object = JSON.parse(json_data)
+#       
+      # context = object.has_key?('context') ?
+        # RHCP::Context.reconstruct_from_json(object['context']) :
+        # RHCP::Context.new(object['cookies'])
+#         
+      # command = broker.get_command(object['command_name'], context)      
+#         
+      # self.new(command, object['param_values'], context)
+    # end
+# 
+    # # returns a JSON representation of this request.
+    # def to_json(*args)
+      # {
+        # 'command_name' => @command.name,
+        # 'param_values' => @param_values,
+        # 'context' => @context.to_json
+      # }.to_json(*args)
+    # end
+    
+    def as_json(options={})
       {
-        'command_name' => @command.name,
-        'param_values' => @param_values,
-        'context' => @context.to_json
-      }.to_json(*args)
+        :command_name => @command.name,
+        :param_values => @param_values,
+        :context => @context
+      }
     end
 
     def to_s
-      "#{@command.name} (#{@param_values})"
+      s = @command.name + ' ('
+      count = 0
+      @param_values.each do |k,v|
+        next if v.class == Proc.class
+        count += 1
+        s += ' ' unless count == 1
+        s += "#{k} => #{v}"
+      end
+      s += ')'
+      s
     end
 
   end

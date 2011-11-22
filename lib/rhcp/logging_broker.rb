@@ -8,6 +8,7 @@ module RHCP
       super()
       @wrapped_broker = wrapped_broker
       @logger = RHCP::ModuleHelper::instance.logger
+      @blacklisted_commands = [ "log_to_jabber", "log_to_jabber_detail", "on_host", "hostname", "ssh_options_for_machine" ]
     end
 
     def get_command_list(context = RHCP::Context.new())
@@ -22,22 +23,24 @@ module RHCP
       @wrapped_broker.clear()
     end
     
-    def get_blacklisted_commands
-      [ "log_to_jabber", "log_to_jabber_detail", "on_host", "hostname" ]
+    def blacklist_defaults
+      [ "log_to_jabber", "log_to_jabber_detail", "on_host", "hostname", "ssh_options_for_machine" ]
     end
     
+    def get_blacklisted_commands
+      []
+    end
+    
+    def graylist
+      [ "on_machine", "list_machines" ]
+    end
     
     # TODO would be nice if this helper method would be accessible from inside vop plugins
     def var_name(name)
       self.class.to_s + "." + name
     end
     
-    def execute(request)
-      blacklisted = get_blacklisted_commands.include?(request.command.name)
-      if not blacklisted and request.context.cookies.has_key?('__loggingbroker.blacklisted_commands') then
-        blacklisted = request.context.cookies['__loggingbroker.blacklisted_commands'].split(',').include?(request.command.name)
-      end
-  
+    def execute(request) 
       command = get_command(request.command.name, request.context)
       mode = command.is_read_only ? 'r/o' : 'r/w'
   
@@ -52,24 +55,48 @@ module RHCP
       
       level = Thread.current[var_name("stack")].size()
       
-      unless blacklisted    
+      blacklist = blacklist_defaults + get_blacklisted_commands
+      blacklisted = false
+      blacklist.each do |sheep|
+        if Thread.current[var_name("stack")].include?(sheep)
+          blacklisted = true
+          break
+        end
+      end
+      if not blacklisted 
+        if request.context.cookies.has_key?('__loggingbroker.blacklisted_commands') then
+          blacklisted = request.context.cookies['__loggingbroker.blacklisted_commands'].split(',').include?(request.command.name)
+        end
+      end
+      
+      graylisted = graylist.include? command.name
+      
+      unless blacklisted or graylisted
         #$logger.info ">> #{command.name} (#{mode}) : #{Thread.current[var_name("stack")].join(" -> ")}"
         start_ts = Time.now()
-        log_request_start(Thread.current[var_name("request_id")], level, mode, Thread.current[var_name("stack")], request, start_ts)
+        log_request_start(Thread.current[var_name("request_id")], level, mode, stack_for_display, request, start_ts)
       end
       
       response = @wrapped_broker.execute(request)
       
-      unless blacklisted
+      
+      unless blacklisted or graylisted
         stop_ts = Time.now()
         duration = stop_ts.to_i - start_ts.to_i
         
-        log_request_stop(Thread.current[var_name("request_id")], level, mode, Thread.current[var_name("stack")], request, response, duration)
+        log_request_stop(Thread.current[var_name("request_id")], level, mode, stack_for_display, request, response, duration)
       end
       
       Thread.current[var_name("stack")].pop
       
+      
       response
+    end
+    
+    def stack_for_display
+      Thread.current[var_name("stack")].select do |command_name|
+        not graylist.include? command_name
+      end.join(".")
     end
 
     def log_request_start(request_id, level, mode, current_stack, request, start_ts)
