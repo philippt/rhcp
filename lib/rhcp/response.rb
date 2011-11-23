@@ -45,29 +45,16 @@ module RHCP
       @context = new_context
     end
     
-    def self.reconstruct_from_json(json_data)
-      object = JSON.parse(json_data)
-      instance = self.new()
-      instance.status = object["status"]
-      instance.error_text = object["error_text"]
-      instance.error_detail = object["error_detail"]
-      instance.set_payload(object["data"])
-      instance.result_text = object['result_text']
-      instance.context = object['cookies']
-      instance.created_at = object['created_at']
-      instance
-    end
-    
-    def to_json(*args)
+    def as_json(options = {})
       {
-        'status' => @status,
-        'error_text' => @error_text,
-        'error_detail' => @error_detail,
-        'data' => @data,   # TODO what about JSONinification of data? (probably data should be JSON-ish data only, i.e. no special objects)
-        'result_text' => @result_text,
-        'cookies' => @context,
-        'created_at' => @created_at
-      }.to_json(*args)
+        :status => @status,
+        :error_text => @error_text,
+        :error_detail => @error_detail,
+        :data => @data,   # TODO what about JSONinification of data? (probably data should be JSON-ish data only, i.e. no special objects)
+        :result_text => @result_text,
+        :cookies => @context,
+        :created_at => @created_at
+      }
     end    
 
   end
