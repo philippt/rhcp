@@ -52,7 +52,7 @@ module RHCP
         :error_detail => @error_detail,
         :data => @data,   # TODO what about JSONinification of data? (probably data should be JSON-ish data only, i.e. no special objects)
         :result_text => @result_text,
-        :cookies => @context,
+        :context => @context,
         :created_at => @created_at
       }
     end    
