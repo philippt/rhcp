@@ -89,6 +89,9 @@ module RHCP
       
       Thread.current[var_name("stack")].pop
       
+      if level == 1
+        Thread.current[var_name("request_id")] = nil
+      end
       
       response
     end
