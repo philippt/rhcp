@@ -39,13 +39,12 @@ module RHCP
       @name = name
       @description = description
 
-      # TODO add default value for optional params
       # TODO also, it should be possible to allow extra values for params with lookups
       @mandatory = options[:mandatory] || false
       @lookup_value_block = options[:lookup_method]     
       @has_lookup_values = @lookup_value_block != nil
       @allows_multiple_values = options[:allows_multiple_values] || false
-      @is_default_param = options[:is_default_param] || false
+      @is_default_param = options[:is_default_param] || options[:default_param] || false
       @autofill_context_key = options[:autofill_context_key] || nil
       @default_value = options[:default_value] || nil
     end
