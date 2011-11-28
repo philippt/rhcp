@@ -46,7 +46,10 @@ module RHCP
   
       is_new_request = Thread.current[var_name("request_id")] == nil
       if is_new_request
-        Thread.current[var_name("request_id")] = Time.now().to_i.to_s + '_' + request.command.name
+        Thread.current[var_name("request_id")] = request.param_values.has_key?('request_id') ?
+          request.param_values['request_id'].first :
+          Time.now().to_i.to_s + '_' + request.command.name
+        
         Thread.current[var_name("stack")] = []
         Thread.current[var_name("id_stack")] = []
       end
