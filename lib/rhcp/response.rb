@@ -53,7 +53,8 @@ module RHCP
         :data => @data,   # TODO what about JSONinification of data? (probably data should be JSON-ish data only, i.e. no special objects)
         :result_text => @result_text,
         :context => @context,
-        :created_at => Time.at(@created_at).iso8601(),
+        :created_at => @created_at,
+        :created_at_iso8601 => Time.at(@created_at).iso8601(),
       }
     end    
 
