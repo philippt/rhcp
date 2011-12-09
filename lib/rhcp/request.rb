@@ -14,20 +14,17 @@ module RHCP
     attr_reader :command
     attr_reader :param_values
     attr_reader :context
+    attr_reader :request_count
 
     # default constructor; will throw exceptions on invalid values
-    def initialize(command, some_param_values = {}, context = RHCP::Context.new(), request_count = nil)
+    def initialize(command, some_param_values = {}, context = RHCP::Context.new())
       param_values = some_param_values.clone()
       @logger = RHCP::ModuleHelper.instance().logger
       raise RHCP::RhcpException.new("command may not be null") if command == nil
       @logger.debug "initializing request #{command.name} with params #{param_values}"
 
       @context = context
-      if request_count
-        @request_count = request_count
-      else        
-        @request_count = @context.incr_and_get_request_counter()
-      end
+      @request_count = @context.incr_and_get_request_counter()
         
       command.params.each do |param|
         
