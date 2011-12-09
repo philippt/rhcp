@@ -12,6 +12,7 @@ module RHCP
     
     def initialize(cookies = {})
       @cookies = cookies
+      @request_counter = 0
     end       
     
     # def to_json(*args)
@@ -29,6 +30,10 @@ module RHCP
       # instance
     # end
 
+    def incr_and_get_request_counter()
+      @request_counter += 1
+    end
+    
     def to_s
       result = "<Context with #{@cookies.size} cookies>"
       # @cookies.each do |k,v|
