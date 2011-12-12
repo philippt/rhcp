@@ -9,9 +9,11 @@ module RHCP
     # hash holding context information; similar to HTTP cookies
     # TODO should we actually use cookies for transporting this info?
     attr_accessor :cookies
+    attr_accessor :request_context_id
     
-    def initialize(cookies = {})
+    def initialize(cookies = {}, request_context_id = nil)
       @cookies = cookies
+      @request_context_id = request_context_id
       @request_counter = 0
     end       
     
