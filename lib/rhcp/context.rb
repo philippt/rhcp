@@ -9,9 +9,12 @@ module RHCP
     # hash holding context information; similar to HTTP cookies
     # TODO should we actually use cookies for transporting this info?
     attr_accessor :cookies
+    attr_accessor :request_context_id
     
-    def initialize(cookies = {})
+    def initialize(cookies = {}, request_context_id = nil)
       @cookies = cookies
+      @request_context_id = request_context_id
+      @request_counter = 0
     end       
     
     # def to_json(*args)
@@ -29,6 +32,10 @@ module RHCP
       # instance
     # end
 
+    def incr_and_get_request_counter()
+      @request_counter += 1
+    end
+    
     def to_s
       result = "<Context with #{@cookies.size} cookies>"
       # @cookies.each do |k,v|
