@@ -32,6 +32,8 @@ module RHCP
     # "true" if this command returns data, but does not modify anything.
     attr_reader :is_read_only
 
+    attr_reader :accepts_extra_params
+    
     # an array of context keys that enable this command
     # 
     # if at least one of the listed keys is found in the context, the command
@@ -56,6 +58,9 @@ module RHCP
       @default_param = nil
       @is_read_only = false
       @enabled_through_context_keys = nil
+      
+      @accepts_extra_params = false
+      
       # TODO formalize this! (we need rules how clients should react, otherwise this will be a mess)
       # TODO in some cases, the display_type could also be guessed from the response, I guess
       @result_hints = {
@@ -106,6 +111,11 @@ module RHCP
       @is_read_only = true
       self
     end
+    
+    def accept_extra_params()
+      @accepts_extra_params = true
+      self
+    end
 
     # returns the specified CommandParam
     # or throws an RhcpException if the parameter does not exist
@@ -115,7 +125,7 @@ module RHCP
       end
       
       # there shouldn't be none
-      raise RHCP::RhcpException.new("no such parameter : #{param_name}") unless existing_params.size > 0
+      raise RHCP::RhcpException.new("undefined parameter '#{param_name}' in '#{self.name}'") unless existing_params.size > 0
       
       # there can be only one
       raise RHCP::RhcpException.new("BUG: duplicate parameters found") if existing_params.size > 1
@@ -140,8 +150,14 @@ module RHCP
       response = RHCP::Response.new()
       
       # check all param values for plausibility
-      request.param_values.each do |key,value|
-        get_param(key).check_param_is_valid(request, value)
+      begin
+        request.param_values.each do |key,value|
+          get_param(key).check_param_is_valid(request, value)
+        end
+      rescue Exception => ex
+        if (/undefined\sparameter/.match(ex.message))
+          raise RHCP::RhcpException.new(ex.message) unless @accepts_extra_params 
+        end
       end
 
       # check that we've got all mandatory params

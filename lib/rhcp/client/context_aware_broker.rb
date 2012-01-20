@@ -23,7 +23,11 @@ module RHCP
       def get_command_list(context=@context)
         @wrapped_broker.get_command_list(context)
       end
-
+      
+      def known_commands
+        @wrapped_broker.known_commands
+      end               
+      
       def give_the_request_some_context_rico(request)
         # TODO think about the errors of your ways, son...
         @context.cookies.each do |k,v|
