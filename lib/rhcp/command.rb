@@ -41,6 +41,8 @@ module RHCP
     # by default
     attr_accessor :enabled_through_context_keys
     
+    attr_accessor :available_if
+    
     # hints about how the result of this command might be displayed
     attr_accessor :result_hints
 
@@ -61,6 +63,8 @@ module RHCP
       
       @accepts_extra_params = false
       
+      @available_if = nil
+      
       # TODO formalize this! (we need rules how clients should react, otherwise this will be a mess)
       # TODO in some cases, the display_type could also be guessed from the response, I guess
       @result_hints = {
@@ -70,7 +74,7 @@ module RHCP
       }
     end
 
-    def is_enabled?(context = RHCP::Context.new())
+    def is_enabled?(context = RHCP::Context.new(), param_values = nil)
       result = true
 
       if @enabled_through_context_keys != nil
@@ -81,6 +85,12 @@ module RHCP
             result = true
             break
           end
+        end
+      end
+
+      if param_values != nil        
+        if @available_if != nil
+          result = @available_if.call(param_values)
         end
       end
 
