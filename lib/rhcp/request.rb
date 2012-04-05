@@ -119,9 +119,9 @@ module RHCP
     
     def as_json(options={})
       {
-        :command_name => @command.name,
+        :command_name => @command.full_name,        
         :param_values => @param_values,
-        :context => @context,
+        :context => @context.as_json(),
         :request_count => @request_count
       }
     end

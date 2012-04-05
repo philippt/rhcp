@@ -36,6 +36,13 @@ module RHCP
       @request_counter += 1
     end
     
+    def as_json(options={})
+      {
+        :cookies => @cookies,
+        :request_context_id => @request_context_id
+      }
+    end
+    
     def to_s
       result = "<Context with #{@cookies.size} cookies>"
       # @cookies.each do |k,v|
