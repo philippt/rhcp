@@ -31,6 +31,10 @@ module RHCP
       []
     end
     
+    def get_graylisted_commands
+      []
+    end
+    
     def graylist
       [ "on_machine", "list_machines" ]
     end

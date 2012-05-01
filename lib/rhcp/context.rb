@@ -15,31 +15,20 @@ module RHCP
       @cookies = cookies
       @request_context_id = request_context_id
       @request_counter = 0
+    end
+    
+    def self.from_hash(h)
+      new(h["cookies"], h["request_context_id"])
     end       
     
-    # def to_json(*args)
-      # {
-        # 'cookies' => @cookies,
-      # }.to_json(*args)
-    # end  
-#     
-    # def self.reconstruct_from_json(json_data)
-      # $logger.debug "reconstructing context from json : >>#{json_data}<<"
-      # object = JSON.parse(json_data)
-      # instance = self.new()
-      # instance.cookies = object['cookies'] 
-#       
-      # instance
-    # end
-
     def incr_and_get_request_counter()
       @request_counter += 1
     end
     
     def as_json(options={})
       {
-        :cookies => @cookies,
-        :request_context_id => @request_context_id
+        "cookies" => @cookies,
+        "request_context_id" => @request_context_id
       }
     end
     

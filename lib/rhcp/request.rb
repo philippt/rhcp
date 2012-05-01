@@ -27,7 +27,6 @@ module RHCP
       @request_count = @context.incr_and_get_request_counter()
         
       command.params.each do |param|
-        
         value_from_context = param.find_value_in_context(context)
         if value_from_context != nil          
           # if the parameter has been specified in the param values, do not override
@@ -45,9 +44,7 @@ module RHCP
             param_values[param.name] = param.default_value
           end
         end
-        
       end
-      
 
       # autobox the parameters if necessary
       param_values.each do |k,v|
@@ -88,35 +85,6 @@ module RHCP
       @command.execute_request(self)
     end
 
-    # reconstructs the request from it's JSON representation
-    # Since the JSON version of a request does hold the command name instead
-    # of the full command only, a broker is needed to lookup the command by
-    # it's name
-    #
-    # Params:
-    #   +broker+ is the broker to use for command lookup
-    #   +json_data+ is the JSON data that represents the request
-    # def self.reconstruct_from_json(broker, json_data)
-      # object = JSON.parse(json_data)
-#       
-      # context = object.has_key?('context') ?
-        # RHCP::Context.reconstruct_from_json(object['context']) :
-        # RHCP::Context.new(object['cookies'])
-#         
-      # command = broker.get_command(object['command_name'], context)      
-#         
-      # self.new(command, object['param_values'], context)
-    # end
-# 
-    # # returns a JSON representation of this request.
-    # def to_json(*args)
-      # {
-        # 'command_name' => @command.name,
-        # 'param_values' => @param_values,
-        # 'context' => @context.to_json
-      # }.to_json(*args)
-    # end
-    
     def as_json(options={})
       {
         :command_name => @command.full_name,        
