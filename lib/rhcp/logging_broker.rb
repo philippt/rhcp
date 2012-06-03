@@ -58,7 +58,7 @@ module RHCP
         Thread.current[var_name("id_stack")] = []
       end
       
-      Thread.current[var_name("stack")] << command.name
+      Thread.current[var_name("stack")] << command.name #unless graylist.include? command.name
       
       level = Thread.current[var_name("stack")].size()
       
@@ -74,20 +74,13 @@ module RHCP
         if request.context.cookies.has_key?('__loggingbroker.blacklisted_commands') then
           blacklisted = request.context.cookies['__loggingbroker.blacklisted_commands'].split(',').include?(request.command.name)
         end
-      end
-      
-      graylisted = graylist.include? command.name
-      
-      unless blacklisted or graylisted
-        #$logger.info ">> #{command.name} (#{mode}) : #{Thread.current[var_name("stack")].join(" -> ")}"
         start_ts = Time.now()
         log_request_start(Thread.current[var_name("request_id")], level, mode, stack_for_display, request, start_ts)
       end
       
       response = @wrapped_broker.execute(request)
       
-      
-      unless blacklisted or graylisted
+      unless blacklisted
         stop_ts = Time.now()
         duration = stop_ts.to_i - start_ts.to_i
         

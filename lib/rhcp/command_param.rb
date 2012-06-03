@@ -35,7 +35,7 @@ module RHCP
     #   :lookup_method            a block that returns an array of lookup values valid for this param
     #   :is_default_param         true if this parameter is the default param for the enclosing command
     #   :default_value            a value to use as default (who would have thought?)
-    def initialize(name, description, options = Hash.new)
+    def initialize(name, description, options = {})
       @name = name
       @description = description
 

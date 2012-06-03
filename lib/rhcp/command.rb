@@ -34,6 +34,8 @@ module RHCP
 
     attr_reader :accepts_extra_params
     
+    attr_reader :ignores_extra_params
+    
     # an array of context keys that enable this command
     # 
     # if at least one of the listed keys is found in the context, the command
@@ -62,6 +64,7 @@ module RHCP
       @enabled_through_context_keys = nil
       
       @accepts_extra_params = false
+      @ignores_extra_params = false
       
       @available_if = nil
       
@@ -126,6 +129,11 @@ module RHCP
       @accepts_extra_params = true
       self
     end
+    
+    def ignore_extra_params()
+      @ignores_extra_params = true
+      self
+    end
 
     # returns the specified CommandParam
     # or throws an RhcpException if the parameter does not exist
@@ -166,7 +174,7 @@ module RHCP
         end
       rescue Exception => ex
         if (/undefined\sparameter/.match(ex.message))
-          raise RHCP::RhcpException.new(ex.message) unless @accepts_extra_params 
+          raise RHCP::RhcpException.new(ex.message) unless @accepts_extra_params or @ignores_extra_params 
         end
       end
 
