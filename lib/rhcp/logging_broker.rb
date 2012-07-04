@@ -39,6 +39,10 @@ module RHCP
       [ "on_machine", "list_machines" ]
     end
     
+    def blacklist
+      blacklist_defaults + get_blacklisted_commands
+    end
+    
     # TODO would be nice if this helper method would be accessible from inside vop plugins
     def var_name(name)
       self.class.to_s + "." + name
@@ -47,50 +51,51 @@ module RHCP
     def execute(request) 
       command = get_command(request.command.name, request.context)
       mode = command.is_read_only ? 'r/o' : 'r/w'
-  
-      is_new_request = Thread.current[var_name("request_id")] == nil
-      if is_new_request
-        Thread.current[var_name("request_id")] = request.param_values.has_key?('request_id') ?
-          request.param_values['request_id'].first :
-          Time.now().to_i.to_s + '_' + request.command.name
+
+      should_be_logged = (not blacklist.include?(command.name))
+
+      if should_be_logged
+        request_id = Thread.current[var_name("request_id")]
         
-        Thread.current[var_name("stack")] = []
-        Thread.current[var_name("id_stack")] = []
-      end
-      
-      Thread.current[var_name("stack")] << command.name #unless graylist.include? command.name
-      
-      level = Thread.current[var_name("stack")].size()
-      
-      blacklist = blacklist_defaults + get_blacklisted_commands
-      blacklisted = false
-      blacklist.each do |sheep|
-        if Thread.current[var_name("stack")].include?(sheep)
-          blacklisted = true
-          break
+        is_new_request = request_id == nil
+        
+        if is_new_request
+          if mode == 'r/o'
+            should_be_logged = false
+          else
+            new_request_id = request.param_values.has_key?('request_id') ?
+              request.param_values['request_id'].first :
+              Time.now().to_i.to_s + '_' + request.command.name
+              
+            Thread.current[var_name("request_id")] = new_request_id
+            
+            Thread.current[var_name("stack")] = []
+            Thread.current[var_name("id_stack")] = []
+          end
         end
-      end
-      if not blacklisted 
-        if request.context.cookies.has_key?('__loggingbroker.blacklisted_commands') then
-          blacklisted = request.context.cookies['__loggingbroker.blacklisted_commands'].split(',').include?(request.command.name)
+        
+        if should_be_logged
+          Thread.current[var_name("stack")] << command.name #unless graylist.include? command.name
+          
+          level = Thread.current[var_name("stack")].size()
+          
+          start_ts = Time.now()
+          log_request_start(Thread.current[var_name("request_id")], level, mode, stack_for_display, request, start_ts)
         end
-        start_ts = Time.now()
-        log_request_start(Thread.current[var_name("request_id")], level, mode, stack_for_display, request, start_ts)
       end
       
       response = @wrapped_broker.execute(request)
       
-      unless blacklisted
+      if should_be_logged
         stop_ts = Time.now()
         duration = stop_ts.to_i - start_ts.to_i
         
         log_request_stop(Thread.current[var_name("request_id")], level, mode, stack_for_display, request, response, duration)
-      end
-      
-      Thread.current[var_name("stack")].pop
-      
-      if level == 1
-        Thread.current[var_name("request_id")] = nil
+        
+        Thread.current[var_name("stack")].pop
+        if level == 1
+          Thread.current[var_name("request_id")] = nil
+        end
       end
       
       response
