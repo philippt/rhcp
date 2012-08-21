@@ -63,9 +63,13 @@ module RHCP
           if mode == 'r/o'
             should_be_logged = false
           else
-            new_request_id = request.param_values.has_key?('request_id') ?
-              request.param_values['request_id'].first :
+            new_request_id = if request.param_values.has_key?('request_id')
+              request.param_values['request_id'].first
+            elsif request.context.request_context_id != nil
+              request.context.request_context_id
+            else
               Time.now().to_i.to_s + '_' + request.command.name
+            end
               
             Thread.current[var_name("request_id")] = new_request_id
             
