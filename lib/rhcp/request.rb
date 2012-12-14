@@ -30,7 +30,7 @@ module RHCP
         value_from_context = param.find_value_in_context(context)
         if value_from_context != nil          
           # if the parameter has been specified in the param values, do not override
-          if ! param_values.has_key?(param.name)
+          unless param_values.has_key?(param.name)
             @logger.debug "pre-filling param #{param.name} with value '#{value_from_context}' (context key '#{param.autofill_context_key}')"
             param_values[param.name] = value_from_context
           end                    

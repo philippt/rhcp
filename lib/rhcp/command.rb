@@ -36,6 +36,8 @@ module RHCP
     
     attr_reader :ignores_extra_params
     
+    attr_accessor :notifications
+    
     # an array of context keys that enable this command
     # 
     # if at least one of the listed keys is found in the context, the command
@@ -65,6 +67,8 @@ module RHCP
       
       @accepts_extra_params = false
       @ignores_extra_params = false
+      
+      @notifications = false
       
       @available_if = nil
       
