@@ -26,6 +26,8 @@ module RHCP
     # the key to a context value that is used for filling this parameter
     attr_reader :autofill_context_key
     
+    attr_reader :allows_extra_values
+    
     attr_accessor :default_value
 
     # creates a new command parameter
@@ -47,6 +49,7 @@ module RHCP
       @is_default_param = options[:is_default_param] || options[:default_param] || false
       @autofill_context_key = options[:autofill_context_key] || nil
       @default_value = options[:default_value] || nil
+      @allows_extra_values = options[:allows_extra_values] || false
     end
 
     # searches the context for a values that can be auto-filled
@@ -96,7 +99,8 @@ module RHCP
       # check against lookup values
       if @has_lookup_values
         possible_value.each do |value|
-          if ! get_lookup_values(request).include?(value)
+          if ! get_lookup_values(request).include?(value) and
+             ! @allows_extra_values
             raise RHCP::RhcpException.new("invalid value '#{value}' for parameter '#{@name}'")
           end
         end
