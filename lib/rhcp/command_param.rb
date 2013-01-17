@@ -26,7 +26,7 @@ module RHCP
     # the key to a context value that is used for filling this parameter
     attr_reader :autofill_context_key
     
-    attr_reader :allows_extra_values
+    attr_accessor :allows_extra_values
     
     attr_accessor :default_value
 
@@ -99,8 +99,7 @@ module RHCP
       # check against lookup values
       if @has_lookup_values
         possible_value.each do |value|
-          if ! get_lookup_values(request).include?(value) and
-             ! @allows_extra_values
+          if (not get_lookup_values(request).include?(value)) and (not @allows_extra_values)
             raise RHCP::RhcpException.new("invalid value '#{value}' for parameter '#{@name}'")
           end
         end
@@ -119,7 +118,8 @@ module RHCP
         'has_lookup_values' => @has_lookup_values,
         'is_default_param' => @is_default_param,
         'mandatory' => @mandatory,
-        'autofill_context_key' => @autofill_context_key
+        'autofill_context_key' => @autofill_context_key,
+        'allows_extra_values' => @allows_extra_values
       }.to_json(*args)
     end        
 

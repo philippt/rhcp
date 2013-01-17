@@ -178,7 +178,9 @@ module RHCP
         end
       rescue Exception => ex
         if (/undefined\sparameter/.match(ex.message))
-          raise RHCP::RhcpException.new(ex.message) unless @accepts_extra_params or @ignores_extra_params 
+          raise RHCP::RhcpException.new(ex.message) unless @accepts_extra_params or @ignores_extra_params
+        else
+          raise ex 
         end
       end
 
