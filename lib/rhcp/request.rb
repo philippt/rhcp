@@ -44,6 +44,15 @@ module RHCP
             param_values[param.name] = param.default_value
           end
         end
+        
+        # autobox if necessary
+        # if param.allows_multiple_values
+          # k = param.name
+          # v = param_values[k]
+          # unless v.instance_of? Array
+            # param_values[k] = [ v ]
+          # end
+        # end
       end
 
       # autobox the parameters if necessary
@@ -73,6 +82,14 @@ module RHCP
       else
         @param_values[param_name][0]
       end
+    end
+    
+    def values
+      result = {}
+      @param_values.keys.each do |k|
+        result[k] = get_param_value(k)
+      end
+      result
     end
 
     def has_param_value(param_name)
