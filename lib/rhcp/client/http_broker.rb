@@ -14,7 +14,7 @@ module RHCP
       # clients can use it exactly as if they were talking to the broker itself.
       class HttpBroker < Broker
 
-        def initialize(url)
+        def initialize(url, user = nil, password = nil)
           # TODO should this really be an URL? or just a host name?
           @url = url
           @logger = RHCP::ModuleHelper.instance.logger
@@ -32,13 +32,11 @@ module RHCP
 #          @op.log_to_jabber_detail("message" => "HTTP_START #{uri} : #{req}")
 #          response = http.request(req)
           
-          res = Net::HTTP.new(@url.host, @url.port).start { |http|
-            if @url.user != nil then
-              @logger.debug "using basic auth data: #{@url.user} / #{@url.password}"
-              http.basic_auth @url.user, @url.password
-            end
-            http.get("/rhcp/") 
-          }
+          http = Net::HTTP.new(@url.host, @url.port)
+          request = Net::HTTP::Get.new('/rhcp/')
+          request.basic_auth user, password if user and password
+          res = http.request request
+          
           if (res.code == "200")
             @logger.info "connected to '#{@url}' successfully."
           else
