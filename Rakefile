@@ -1,11 +1,11 @@
 require 'rake'
 require 'rake/testtask'
-require 'rake/rdoctask'
+#require 'rake/rdoctask'
 require 'rubygems'
 #Gem::manage_gems
-require 'rake/gempackagetask'
+#require 'rake/gempackagetask'
 
-require 'rubyforge'
+#require 'rubyforge'
 
 $LOAD_PATH.push('lib')
 require File.join(File.dirname(__FILE__), 'lib', 'rhcp')
@@ -27,17 +27,6 @@ Rake::TestTask.new() { |t|
   t.verbose = true
 }
 
-###############################################
-### RDOC
-Rake::RDocTask.new { |rdoc|
-  rdoc.rdoc_dir = 'doc'
-  rdoc.title    = "RHCP - really helpful command protocol"
-  rdoc.options << '--line-numbers' << '--inline-source' <<
-    '--accessor' << 'cattr_accessor=object'
-  rdoc.template = "#{ENV['template']}.rb" if ENV['template']
-  #rdoc.rdoc_files.include('README', 'CHANGELOG')
-  rdoc.rdoc_files.include('lib/**/*.rb')
-}
 
 ###############################################
 ### METRICS

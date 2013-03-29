@@ -228,7 +228,7 @@ module RHCP
       response = the_broker.execute(request)
 
       if (response.status != RHCP::Response::Status::OK) then        
-        $logger.error("#{response.error_text}\n#{response.error_detail}")
+        #$logger.error("#{response.error_text}\n#{response.error_detail}")
         e = RhcpException.new(response.error_text)
         e.set_backtrace(response.error_detail)
         raise e
