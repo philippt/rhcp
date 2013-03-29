@@ -177,11 +177,7 @@ module RHCP
           get_param(key).check_param_is_valid(request, value)
         end
       rescue Exception => ex
-        if (/undefined\sparameter/.match(ex.message))
-          raise RHCP::RhcpException.new(ex.message) unless @accepts_extra_params or @ignores_extra_params
-        else
-          raise ex 
-        end
+        raise unless /undefined\sparameter/.match(ex.message)
       end
 
       # check that we've got all mandatory params
@@ -199,9 +195,6 @@ module RHCP
         response.mark_as_error(ex.to_s, ex.backtrace.join("\n"))
       end
 
-      # the command has been executed, so we should clear the store of collected param values
-      #request.context.collected_values = {}
-      
       response
     end
     
@@ -210,7 +203,40 @@ module RHCP
       execute_request(req)
     end
     
-    def add_as_instance_method(the_instance, additional_param_values = {})
+    def execute_from_ruby_args(args, additional_params, block)
+      # args is an array - but we need the (optional) hash on index 0
+      param_values = {}
+      if args.length > 0
+        param_values = args.first
+        if param_values.class == String && default_param != nil
+          $logger.debug "autoboxing for #{default_param.name}"
+          param_values = {
+            default_param.name => param_values
+          }
+        end
+      end
+      if defined?(block) and self.params.select { |p| p.name == "block" }.size > 0
+        param_values["block"] = block
+      end
+
+      # we need to carry along the context
+      the_broker = Thread.current['broker']
+      
+      param_values.merge! additional_params
+
+      request = RHCP::Request.new(self, param_values, the_broker.context)
+      response = the_broker.execute(request)
+
+      if (response.status != RHCP::Response::Status::OK) then        
+        $logger.error("#{response.error_text}\n#{response.error_detail}")
+        e = RhcpException.new(response.error_text)
+        e.set_backtrace(response.error_detail)
+        raise e
+      end
+      response.data
+    end
+    
+    def add_as_instance_method(the_instance, additional_params = {})
       rhcp_command = self
       command_name = rhcp_command.name
   
@@ -219,34 +245,7 @@ module RHCP
         the_instance.class.send(:remove_method, command_name.to_sym)
       end
       the_instance.class.send(:define_method, command_name.to_sym) do |*args|
-        # args is an array - but we need the (optional) hash on index 0
-        param_values = {}
-        if args.length > 0
-          param_values = args.first
-        end
-  
-        # we need to carry along the context
-        the_broker = Thread.current['broker']
-        
-        param_values.merge! additional_param_values
-  
-        #param_values["host"] = @hostname if self.class.to_s == "HostController"
-        
-        request = RHCP::Request.new(rhcp_command, param_values, the_broker.context)
-        
-        response = the_broker.execute(request)
-  
-        if (response.status != RHCP::Response::Status::OK) then
-          # TODO actually, it would be nice if we could log the details into a file and show only the message
-          filtered_error_detail = response.error_detail.split("\n").select do |line|
-            /lib\/plugins\//.match(line)
-          end.join("\n")
-          
-          $logger.error("#{response.error_text}\n#{response.error_detail}")
-          #$logger.error("#{response.error_text}")
-          raise RuntimeError.new(response.error_text)
-        end
-        response.data
+        execute_from_ruby_args(args, additional_params)
       end
     end
     
