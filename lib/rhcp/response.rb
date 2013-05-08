@@ -1,6 +1,8 @@
 require 'rubygems'
 require 'json'
 
+require 'rhcp/encoding_helper'
+
 module RHCP
 
   class Response
@@ -50,7 +52,8 @@ module RHCP
         :status => @status,
         :error_text => @error_text,
         :error_detail => @error_detail,
-        :data => @data,   # TODO what about JSONinification of data? (probably data should be JSON-ish data only, i.e. no special objects)
+        #:data => Base64.encode64(@data.to_s),   # TODO what about JSONinification of data? (probably data should be JSON-ish data only, i.e. no special objects)
+        :data => @data,
         :result_text => @result_text,
         :context => @context,
         :created_at => @created_at,
