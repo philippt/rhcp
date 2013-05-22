@@ -17,9 +17,12 @@ module RHCP
         thing.each do |k,v|
           result[k] = change_string_values(v, &block)
         end
-      when "String","Fixnum","Boolean","TrueClass","FalseClass"
+      #when "String","Fixnum","Boolean","TrueClass","FalseClass"
+      when "String"
         result = block.call(thing.to_s)
-      when "Proc","NilClass"
+      when "Fixnum","TrueClass","FalseClass"
+        result = thing
+      when "Proc","NilClass","Binding"
         # ignore
       else
         $logger.warn("don't know how to handle #{thing.class} - skipping")

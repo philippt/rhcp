@@ -48,17 +48,23 @@ module RHCP
     end
     
     def as_json(options = {})
-      {
-        :status => @status,
-        :error_text => @error_text,
-        :error_detail => @error_detail,
-        #:data => Base64.encode64(@data.to_s),   # TODO what about JSONinification of data? (probably data should be JSON-ish data only, i.e. no special objects)
-        :data => @data,
-        :result_text => @result_text,
-        :context => @context,
-        :created_at => @created_at,
-        :created_at_iso8601 => Time.at(@created_at).iso8601(),
-      }
+      begin
+        {
+          :status => @status,
+          :error_text => @error_text,
+          :error_detail => @error_detail,
+          #:data => Base64.encode64(@data.to_s),   # TODO what about JSONinification of data? (probably data should be JSON-ish data only, i.e. no special objects)
+          :data => @data,
+          :result_text => @result_text,
+          :context => @context,
+          :created_at => @created_at,
+          :created_at_iso8601 => Time.at(@created_at.to_i).iso8601(),
+        }
+      rescue => detail
+        $logger.warn("could not convert response to JSON : #{detail.message}\ncreated at: #{@created_at}")
+        puts @created_at.pretty_inspect 
+        raise
+      end
     end    
 
   end
