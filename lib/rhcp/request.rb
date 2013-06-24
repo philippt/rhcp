@@ -1,6 +1,8 @@
 require 'rhcp/rhcp_exception'
 require 'rhcp/broker'
 
+require 'rhcp/encoding_helper'
+
 require 'rubygems'
 require 'json'
 
@@ -101,16 +103,24 @@ module RHCP
     def execute
       @command.execute_request(self)
     end
+    
+    def base64_param_values
+      result = {}
+      @param_values.each do |k,v|
+        result[k] = EncodingHelper.to_base64(v)
+      end
+      result
+    end
 
     def as_json(options={})
       {
         :command_name => @command.full_name,        
-        :param_values => @param_values,
+        :param_values => base64_param_values(),
         :context => @context.as_json(),
         :request_count => @request_count
       }
     end
-
+    
     def to_s
       s = @command.name + ' ('
       count = 0

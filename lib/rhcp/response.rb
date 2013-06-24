@@ -1,6 +1,8 @@
 require 'rubygems'
 require 'json'
 
+require 'rhcp/encoding_helper'
+
 module RHCP
 
   class Response
@@ -52,6 +54,7 @@ module RHCP
     end
     
     def as_json(options = {})
+      begin
       {
         :status => @status,
         :error_text => @error_text,
@@ -63,6 +66,11 @@ module RHCP
         :created_at => @created_at,
         :created_at_iso8601 => Time.at(@created_at).iso8601(),
       }
+      rescue => detail
+        $logger.warn("could not convert response to JSON : #{detail.message}\ncreated at: #{@created_at}")
+        puts @created_at.pretty_inspect 
+        raise
+      end
     end    
 
   end
