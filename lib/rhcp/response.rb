@@ -15,8 +15,9 @@ module RHCP
     attr_accessor :error_text
     attr_accessor :error_detail
     attr_accessor :data
-    # TODO this should be called 'cookies'
+    # TODO this should be called 'cookies' maybe
     attr_accessor :context
+    attr_accessor :anti_context
     
     # textual description of the result (optional)
     attr_accessor :result_text
@@ -28,6 +29,7 @@ module RHCP
       @error_detail = ""
       @result_text = ""
       @context = nil
+      @anti_context = []
       @created_at = Time.now().to_i
     end
     
@@ -45,6 +47,10 @@ module RHCP
       @context = new_context
     end
     
+    def delete_cookie(key)
+      @anti_context << key
+    end
+    
     def as_json(options = {})
       {
         :status => @status,
@@ -53,6 +59,7 @@ module RHCP
         :data => @data,   # TODO what about JSONinification of data? (probably data should be JSON-ish data only, i.e. no special objects)
         :result_text => @result_text,
         :context => @context,
+        :anti_context => @anti_context,
         :created_at => @created_at,
         :created_at_iso8601 => Time.at(@created_at).iso8601(),
       }
