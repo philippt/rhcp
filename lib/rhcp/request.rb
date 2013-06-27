@@ -39,7 +39,7 @@ module RHCP
         end
         
         # fill params with default values
-        if ! param_values.has_key?(param.name) and param.default_value != nil
+        if ! param_values.has_key?(param.name) && param.default_value != nil
           if param.default_value.class == Proc
             param_values[param.name] = param.default_value.call(param_values)          
           else
