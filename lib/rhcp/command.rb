@@ -188,7 +188,7 @@ module RHCP
       end
       
       begin
-        # TODO redirect the block's output (both Logger and STDOUT/STDERR) and send it back with the response
+        # TODO redirect the block's output (both Logger and STDOUT/STDERR) and send it back with the response?
         result = block.call(request, response)
         response.set_payload(result)
       rescue Exception => ex
@@ -222,9 +222,10 @@ module RHCP
       # we need to carry along the context
       the_broker = Thread.current['broker']
       
-      param_values.merge! additional_params
+      c = the_broker.context.clone
+      c.cookies.merge! additional_params
 
-      request = RHCP::Request.new(self, param_values, the_broker.context)
+      request = RHCP::Request.new(self, param_values, c)
       response = the_broker.execute(request)
 
       if (response.status != RHCP::Response::Status::OK) then        

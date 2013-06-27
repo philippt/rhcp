@@ -45,11 +45,18 @@ module RHCP
         response = @wrapped_broker.execute(new_request)
 
         # store context received with response
-        if response.context != nil
+        if response.context
           # TODO it would be nice if we could delete cookies as well
           response.context.each do |key,value|
             @context.cookies[key] = value
             $logger.debug "storing value '#{value}' for key '#{key}' in context"
+          end
+        end
+        
+        if response.anti_context
+          response.anti_context.each do |key|
+            @context.cookies.delete(key)
+            $logger.info "deleted cookie '#{key}'"
           end
         end
 
@@ -67,6 +74,7 @@ module RHCP
 
       def get_lookup_values(request, param_name)
         request_with_context = give_the_request_some_context_rico(request)
+        request_with_context.context.cookies["phase"] = "lookup"
         @wrapped_broker.get_lookup_values(request_with_context, param_name)
       end
 
