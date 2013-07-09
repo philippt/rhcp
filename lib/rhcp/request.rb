@@ -68,7 +68,7 @@ module RHCP
       @param_values = param_values
 
       printable_param_values = param_values.map do |a,b|
-        a + '=' + b.join(',')
+        a.to_s + '=' + b.join(',')
       end.join('; ')
       @logger.debug("request initialized : command '#{command.name}', params : #{printable_param_values}")
     end
