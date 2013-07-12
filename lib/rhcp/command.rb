@@ -223,7 +223,7 @@ module RHCP
       the_broker = Thread.current['broker']
       
       c = the_broker.context.clone
-      #c.cookies.merge! additional_params
+      c.cookies.merge! additional_params
       param_values.merge! additional_params 
 
       request = RHCP::Request.new(self, param_values, c)
