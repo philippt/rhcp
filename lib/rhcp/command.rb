@@ -219,14 +219,21 @@ module RHCP
         param_values["block"] = block
       end
 
+      param_values.merge! additional_params
+       
       # we need to carry along the context
-      the_broker = Thread.current['broker']
+      c = RHCP::Context.new()
       
-      c = the_broker.context.clone
+      the_broker = Thread.current['broker']      
+      the_broker.context.cookies.each do |k,v|
+        c.cookies[k] = v  
+      end
       #c.cookies.merge! additional_params
-      param_values.merge! additional_params 
 
       request = RHCP::Request.new(self, param_values, c)
+      #puts ""
+      #puts "gonna execute #{request}"
+      #pp c.cookies
       response = the_broker.execute(request)
 
       if (response.status != RHCP::Response::Status::OK) then        
@@ -252,8 +259,8 @@ module RHCP
     end
     
     
-    # we do not serialize the block (no sense in this) nor the default param
-    # when the command is unmarshalled as stub, the default param will be set again
+    # we do not serialize the block nor the default param
+    # when the command is unmarshalled, the default param will be set again
     # automatically by add_param(), and the block will be replaced by the block
     # that does the remote invocation
     def to_json(*args)

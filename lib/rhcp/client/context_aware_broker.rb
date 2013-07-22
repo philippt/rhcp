@@ -46,7 +46,6 @@ module RHCP
 
         # store context received with response
         if response.context
-          # TODO it would be nice if we could delete cookies as well
           response.context.each do |key,value|
             @context.cookies[key] = value
             $logger.debug "storing value '#{value}' for key '#{key}' in context"
