@@ -25,7 +25,7 @@ module RHCP
       when "Proc","NilClass","Binding"
         # ignore
       else
-        $logger.warn("don't know how to handle #{thing.class} - skipping")
+        $logger.debug("don't know how to encode #{thing.class} - skipping")
       end
       result
     end
