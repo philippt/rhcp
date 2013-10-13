@@ -77,9 +77,9 @@ spec = Gem::Specification.new do |s|
     s.executables = 'rhcp_test_server'
 end
 
-Rake::GemPackageTask.new(spec) do |pkg|
-    pkg.need_tar = true
-end
+#Rake::GemPackageTask.new(spec) do |pkg|
+#    pkg.need_tar = true
+#end
 
 
 task :upload_gem do

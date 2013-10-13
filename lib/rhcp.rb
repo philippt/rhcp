@@ -41,6 +41,7 @@ module RHCP #:nodoc:
       # TODO do we really want to log to STDOUT per default?
       # TODO check the whole package for correct usage of loggers
       @logger = Logger.new(STDOUT)
+      @logger.level = Logger::INFO
     end
     
     
