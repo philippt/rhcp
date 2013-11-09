@@ -8,7 +8,7 @@ module RHCP
       super()
       @wrapped_broker = wrapped_broker
       @logger = RHCP::ModuleHelper::instance.logger
-      @blacklisted_commands = [ "log_to_jabber", "log_to_jabber_detail", "on_host", "hostname", "ssh_options_for_machine" ]
+      @blacklisted_commands = [ ]
     end
 
     def get_command_list(context = RHCP::Context.new())
@@ -24,7 +24,7 @@ module RHCP
     end
     
     def blacklist_defaults
-      [ "log_to_jabber", "log_to_jabber_detail", "on_host", "hostname", "ssh_options_for_machine" ]
+      [ ]
     end
     
     def get_blacklisted_commands
@@ -52,7 +52,9 @@ module RHCP
       command = get_command(request.command.name, request.context)
       mode = command.is_read_only ? 'r/o' : 'r/w'
 
-      should_be_logged = (not blacklist.include?(command.name))
+      should_be_logged = (! blacklist.include?(command.name) && ! command.is_read_only)
+
+      #puts "#{command.name} [#{mode}] #{should_be_logged ? 'pass' : 'skip'}"
 
       if should_be_logged
         request_id = Thread.current[var_name("request_id")]

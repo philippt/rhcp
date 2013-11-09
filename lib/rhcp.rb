@@ -23,7 +23,7 @@ module RHCP #:nodoc:
     
     MAJOR = 0
     MINOR = 2
-    TINY  = 22
+    TINY  = 23
 
     def Version.to_s
       [ MAJOR, MINOR, TINY ].join(".")
